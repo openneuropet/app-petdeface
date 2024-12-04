@@ -97,16 +97,16 @@ elif t1_subject_id != pet_subject_id:
     raise Exception(f"Subject id's for t1w file {t1_file} and PET file {pet_file} do not match, exiting.")
 else:
     subject_id = t1_subject_id
-    t1_session_id = collect_bids_part('session', t1_file)
-    pet_session_id = collect_bids_part('session', pet_file)
+    t1_session_id = collect_bids_part('ses', t1_file)
+    pet_session_id = collect_bids_part('ses', pet_file)
 
 # collect the parent path to this script
 app_petdeface_path = pathlib.Path(__file__).parent.resolve()
 
 # open a temporary BIDS directory for running the pipeline
-with tempfile.TemporaryDirectory as tempdir:
+with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
     shutil.copy(app_petdeface_path / 'dataset_description.json', tempdir)
-    shutil.copy(app_petdeface_path / 'README.md', pathlib.Path(tempdir / 'README'))
+    shutil.copy(app_petdeface_path / 'README.md', pathlib.Path(tempdir) / 'README')
     # create a subject directory in the tempdir
     subject_dir = pathlib.Path(pathlib.Path(tempdir) / subject_id)
     if subject_dir.exists():
@@ -116,18 +116,21 @@ with tempfile.TemporaryDirectory as tempdir:
     
     # create any sessions folders that may exist
     if t1_session_id:
-        t1_dir = subject_dir / "ses-" + t1_session_id / "anat/"
+        t1_dir = subject_dir / t1_session_id / "anat/"
     else:
         t1_dir = subject_dir / "anat/"
 
     t1_dir.mkdir()
-    shutil.move(t1_file, t1_dir)
+    shutil.copy(t1_file, t1_dir)
 
     if pet_session_id:
-        pet_dir = subject_dir / "ses-" + pet_session_id / "pet/"
+        pet_dir = subject_dir / pet_session_id / "pet/"
     else:
         pet_dir = subject_dir / "pet/"
 
-    pet_dir.mkdir()
-    shutil.move(pet_file, pet_dir)
+    pet_dir.mkdir(parents=True)
+    shutil.copy(pet_file, pet_dir)
+    shutil.copy(pet_file_json, pet_dir)
+
+    print('debug')
 

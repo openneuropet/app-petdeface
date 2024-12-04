@@ -35,7 +35,7 @@
             "Name": "app-petdeface",
             "Version": "1.0.0",
             "Description": "This is a fake dataset created to adapt the BIDS app to process PET data with only a T1w and PET image for input",
-            "CodeURL": "https://brainlife.io/",
+            "CodeURL": "https://brainlife.io/"
         }
     ],
     "HEDVersion": []
