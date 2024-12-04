@@ -7,7 +7,10 @@ import pathlib
 import re
 import os
 import shutil
+import json
+import subprocess
 from typing import Union
+
 
 def collect_bids_part(bids_part: str, path_like: Union[str, pathlib.Path]) -> str:
     """
@@ -71,8 +74,20 @@ def collect_bids_part(bids_part: str, path_like: Union[str, pathlib.Path]) -> st
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--t1_file", "-t", type=Union[str], required=True, help="Path to the T1w anatomical file to be used for defacing")
-parser.add_argument("--pet_file", "-p", type=Union[str], required=True, help="Path to PET image to deface using T1w image as registration")
+parser.add_argument(
+    "--t1_file",
+    "-t",
+    type=Union[str],
+    required=True,
+    help="Path to the T1w anatomical file to be used for defacing",
+)
+parser.add_argument(
+    "--pet_file",
+    "-p",
+    type=Union[str],
+    required=True,
+    help="Path to PET image to deface using T1w image as registration",
+)
 
 args = parser.parse_args()
 
@@ -80,40 +95,44 @@ t1_file = pathlib.Path(args.t1_file)
 pet_file = pathlib.Path(args.pet_file)
 # make sure there is a pet json associated with the pet file by replacing .nii or .nii.gz suffixes with .json
 if pet_file.suffix == ".gz":
-    pet_file_json = pet_file.with_suffix('').with_suffix('.json')
+    pet_file_json = pet_file.with_suffix("").with_suffix(".json")
 else:
-    pet_file_json = pet_file.with_suffix('.json')
+    pet_file_json = pet_file.with_suffix(".json")
 
 # collect the entities following the subject and potentially session ids from both the pet and t1 files
-t1_subject_id = collect_bids_part('sub', t1_file)
-pet_subject_id = collect_bids_part('sub', pet_file)
+t1_subject_id = collect_bids_part("sub", t1_file)
+pet_subject_id = collect_bids_part("sub", pet_file)
 t1_session_id = None
 pet_session_id = None
 
 if not t1_subject_id and not pet_subject_id:
     subject_id = "temporarydefacee"
-    print("No BIDS subject id located, creating a temporary id {subject_id} for processing.")
+    print(
+        "No BIDS subject id located, creating a temporary id {subject_id} for processing."
+    )
 elif t1_subject_id != pet_subject_id:
-    raise Exception(f"Subject id's for t1w file {t1_file} and PET file {pet_file} do not match, exiting.")
+    raise Exception(
+        f"Subject id's for t1w file {t1_file} and PET file {pet_file} do not match, exiting."
+    )
 else:
     subject_id = t1_subject_id
-    t1_session_id = collect_bids_part('ses', t1_file)
-    pet_session_id = collect_bids_part('ses', pet_file)
+    t1_session_id = collect_bids_part("ses", t1_file)
+    pet_session_id = collect_bids_part("ses", pet_file)
 
 # collect the parent path to this script
 app_petdeface_path = pathlib.Path(__file__).parent.resolve()
 
 # open a temporary BIDS directory for running the pipeline
 with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
-    shutil.copy(app_petdeface_path / 'dataset_description.json', tempdir)
-    shutil.copy(app_petdeface_path / 'README.md', pathlib.Path(tempdir) / 'README')
+    shutil.copy(app_petdeface_path / "dataset_description.json", tempdir)
+    shutil.copy(app_petdeface_path / "README.md", pathlib.Path(tempdir) / "README")
     # create a subject directory in the tempdir
     subject_dir = pathlib.Path(pathlib.Path(tempdir) / subject_id)
     if subject_dir.exists():
         subject_dir.rmdir()
     else:
         subject_dir.mkdir(parents=True)
-    
+
     # create any sessions folders that may exist
     if t1_session_id:
         t1_dir = subject_dir / t1_session_id / "anat/"
@@ -132,5 +151,56 @@ with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
     shutil.copy(pet_file, pet_dir)
     shutil.copy(pet_file_json, pet_dir)
 
-    print('debug')
+    print("debug")
 
+    # run the pet defacing pipeline
+    #! /bin/bash
+
+    # collect environment variables as well as vars from config.json
+    with open("config.json", "r") as f:
+        config = json.load(f)
+        input_dir = config.get("input_dir", "")
+        output_dir = config.get("output_dir", "")
+        n_procs = config.get("n_procs", "")
+        placement = config.get("placement", "")
+        participant_label = config.get("participant_label", "")
+
+    freesurfer_license = os.environ.get("FREESURFER_LICENSE", "")
+    if not freesurfer_license:
+        raise Exception("FREESURFER_LICENSE environment variable not set, exiting.")
+    else:
+        shutil.copy(freesurfer_license, app_petdeface_path / "license.txt")
+
+    # build subprocess command
+    command = [
+        "timit",
+        "singularity",
+        "exec",
+        "-e",
+        "-B",
+        f"{freesurfer_license}:/opt/freesurfer/license.txt",
+        "docker://openneuropet/petdeface:latest",
+        "petdeface",
+        f"{input_dir}",
+        "--output_dir",
+        f"{output_dir}",
+        "--n_procs",
+        f"{n_procs}",
+        "--placement",
+        f"{placement}",
+        "--n_procs",
+        f"{n_procs}",
+        "--participant_label",
+        f"{participant_label}",
+    ]
+
+    defacing = subprocess.run(command, check=True)
+
+    # copy the defaced pet, defaced t1w, and the registration mask files back to their original locations
+    defaced_pet = pathlib.Path(output_dir) / subject_id / pet_session_id / "pet"
+    defaced_t1 = pathlib.Path(output_dir) / t1_dir / "anat" / t1_file.name
+    # TODO copy over the defacing mask and restration files as well.
+    #defacing_mask = pathlib.Path(output_dir) / 'derivatives' / 'petdeface' / subject_id / pet_session_id / "pet" / "defacing_mask.nii.gz"
+    shutil.copy(defaced_pet, pet_file)
+    shutil.copy(defaced_pet.with_suffix(".json"), pet_file.with_suffix(".json"))
+    shutil.copy()
