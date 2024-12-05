@@ -1,8 +1,7 @@
 {
-    "input_dir": ".",
-    "output_dir": "./derivatives/petdeface",
+    "t1_image": "",
+    "pet_image": "",
+    "pet_image_json": "",
     "n_procs": 2,
     "placement": "adjacent",
-    "skip_bids_validator": false,
-    "participant_label": []
 }

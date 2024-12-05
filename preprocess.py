@@ -159,11 +159,8 @@ with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
     # collect environment variables as well as vars from config.json
     with open("config.json", "r") as f:
         config = json.load(f)
-        input_dir = config.get("input_dir", "")
-        output_dir = config.get("output_dir", "")
         n_procs = config.get("n_procs", "")
-        placement = config.get("placement", "")
-        participant_label = config.get("participant_label", "")
+        placement = config.get("placement", "inplace")
 
     freesurfer_license = os.environ.get("FREESURFER_LICENSE", "")
     if not freesurfer_license:
@@ -181,17 +178,14 @@ with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
         f"{freesurfer_license}:/opt/freesurfer/license.txt",
         "docker://openneuropet/petdeface:latest",
         "petdeface",
-        f"{input_dir}",
-        "--output_dir",
-        f"{output_dir}",
+        f"{tempdir}",
+        f"{tempdir}",
         "--n_procs",
         f"{n_procs}",
         "--placement",
         f"{placement}",
         "--n_procs",
         f"{n_procs}",
-        "--participant_label",
-        f"{participant_label}",
     ]
 
     defacing = subprocess.run(command, check=True)
