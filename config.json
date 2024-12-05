@@ -3,5 +3,5 @@
     "pet_image": "",
     "pet_image_json": "",
     "n_procs": 2,
-    "placement": "adjacent",
+    "placement": "adjacent"
 }

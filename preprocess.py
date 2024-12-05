@@ -170,7 +170,6 @@ with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
 
     # build subprocess command
     command = [
-        "timit",
         "singularity",
         "exec",
         "-e",
@@ -179,7 +178,7 @@ with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
         "docker://openneuropet/petdeface:latest",
         "petdeface",
         f"{tempdir}",
-        f"{tempdir}",
+        "output",
         "--n_procs",
         f"{n_procs}",
         "--placement",
@@ -191,10 +190,10 @@ with tempfile.TemporaryDirectory(dir=app_petdeface_path) as tempdir:
     defacing = subprocess.run(command, check=True)
 
     # copy the defaced pet, defaced t1w, and the registration mask files back to their original locations
-    defaced_pet = pathlib.Path(output_dir) / subject_id / pet_session_id / "pet"
-    defaced_t1 = pathlib.Path(output_dir) / t1_dir / "anat" / t1_file.name
+    #defaced_pet = pathlib.Path(output_dir) / subject_id / pet_session_id / "pet"
+    #defaced_t1 = pathlib.Path(output_dir) / t1_dir / "anat" / t1_file.name
     # TODO copy over the defacing mask and restration files as well.
     #defacing_mask = pathlib.Path(output_dir) / 'derivatives' / 'petdeface' / subject_id / pet_session_id / "pet" / "defacing_mask.nii.gz"
-    shutil.copy(defaced_pet, pet_file)
-    shutil.copy(defaced_pet.with_suffix(".json"), pet_file.with_suffix(".json"))
-    shutil.copy()
+    #shutil.copy(defaced_pet, pet_file)
+    #shutil.copy(defaced_pet.with_suffix(".json"), pet_file.with_suffix(".json"))
+    #shutil.copy()
