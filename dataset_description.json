@@ -1,0 +1,42 @@
+{
+    "Name": "Positron Emission Tomography Quantification in rodents of Cyclooxygenase-2 (COX-2), a Potential Biomarker of Neuroinflammation",
+    "BIDSVersion": "1.9.0",
+    "DatasetType": "raw",
+    "License": "CC0",
+    "Authors": [
+       "app, petdeface",
+       "brainlife, io"
+    ],
+    "Acknowledgements": "",
+    "HowToAcknowledge": "",
+    "Funding": [
+        "",
+        ""
+    ],
+    "EthicsApprovals": [
+        "This is boiler plate to make the petdeface BIDS app behave."
+    ],
+    "ReferencesAndLinks": [
+        "1.\tDoe J, Smith A, Johnson B. Exploring the effects of fictional compounds on brain activity. J Imaginary Med. 2023;12:101-110.",
+        "2.\tRoe P, Lee K, Patel R. The impact of hypothetical radioligands on neuroinflammation. J Hypothet Res. 2022;15:200-210.",
+        "3.\tMiller T, Brown L, Davis M. A study on the fictional biomarkers in neurodegenerative diseases. J Fictitious Biol. 2021;8:50-60.",
+        "4.\tWilson E, Green S, Harris N. Novel approaches to imaging fictional brain receptors. Imaginary Neurosci. 2020;5:300-310.",
+        "5.\tTaylor R, White J, Clark P. The role of hypothetical enzymes in brain function. J Theor Med. 2019;10:400-410.",
+        "6.\tAnderson Q, Martinez L, Robinson T. Investigating the potential of fictional PET tracers. J Imaginary Sci. 2018;7:150-160.",
+        "7.\tThomas G, Lewis H, Walker D. The development of new fictional imaging techniques. J Hypothet Imag. 2017;9:250-260.",
+        "8.\tJackson P, Young M, Evans R. The effects of fictional neuroinflammation markers on cognitive function. J Imaginary Neuro. 2016;11:350-360.",
+        "9.\tHarris J, King A, Wright S. A comprehensive review of fictional neuroimaging studies. J Fictitious Med. 2015;13:450-460.",
+        "10.\tClark B, Adams C, Nelson D. The application of hypothetical radioligands in brain research. J Theor Neuro. 2014;6:550-560."
+    ],
+    "DatasetDOI": "",
+    "SourceDatasets": [],
+    "GeneratedBy": [
+        {
+            "Name": "app-petdeface",
+            "Version": "1.0.0",
+            "Description": "This is a fake dataset created to adapt the BIDS app to process PET data with only a T1w and PET image for input",
+            "CodeURL": "https://brainlife.io/"
+        }
+    ],
+    "HEDVersion": []
+}
