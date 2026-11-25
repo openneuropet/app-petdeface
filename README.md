@@ -1,4 +1,47 @@
 # app-petdeface
+
+<!-- brainlife-app:begin (generated from the App manifest; edit the manifest, not this block) -->
+
+> **Defaces a PET image and its T1-weighted anatomical image with petdeface, a Nipype pipeline that co-registers the two and applies FreeSurfer MiDeFace.**
+
+Wraps the openneuropet petdeface tool, which builds a temporary BIDS dataset from the PET and T1w files, co-registers them and removes facial features from both. Use it to anonymise PET data before sharing. Requires a FreeSurfer license. The current main script expects --t1_file and --pet_file command-line arguments and does not read config.json, so the App may not run as registered.
+
+| | |
+|---|---|
+| 📥 **Inputs** | `neuro/pet` · `neuro/anat/t1w` |
+| 📤 **Outputs** | `neuro/pet` · `neuro/anat/t1w` |
+| 🐳 **Container** | `openneuropet/petdeface:latest` |
+| 🔗 **Run it** | [doi.org/10.25663/brainlife.app.833](https://doi.org/10.25663/brainlife.app.833) |
+
+#### 📥 Inputs
+
+| Input | Datatype | Required | Description |
+|---|---|---|---|
+| `pet_data` | `neuro/pet` | yes | PET image with its JSON sidecar (blood data optional). |
+| `t1_image` | `neuro/anat/t1w` | yes | T1-weighted image of the same subject, used for registration and defacing. |
+
+#### 📤 Outputs
+
+| Output | Datatype | Description |
+|---|---|---|
+| `defaced_pet` | `neuro/pet` | Defaced PET image. |
+| `defaced_t1` | `neuro/anat/t1w` | Defaced T1-weighted image. |
+
+<details>
+<summary><b>⚙️ Parameters</b> (5)</summary>
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `input_dir` | string | `.` | PET BIDS Input Directory, must contain both PET and T1w images for each subject. |
+| `output_dir` | string | `./derivatives` | Defaults to using the derivatives folder in the input directory as a working dir. If used with the "placement" argument |
+| `n_procs` | number | `2` | Number of processors/threads to use in the defacing pipeline. |
+| `skip_bids_validator` | string | `false` | Pipeline will normally fail if dataset is not BIDS valid, setting this to true can help "push" through an almost compliant BIDS dataset. |
+| `participant_label` | string | `[]` | List of subject ID's to selectively deface. |
+
+</details>
+
+<!-- brainlife-app:end -->
+
 PET Deface Packaged as a Brainlife.io app
 
 # Details
